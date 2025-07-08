@@ -1,0 +1,8 @@
+Copyright (c) 2025 Preston Melvin. All rights reserved.
+
+This software is proprietary and confidential. Unauthorized copying, redistribution,
+or modification of any part of this codebase is strictly prohibited without express
+written permission from the owner.
+
+This repository is intended for demonstration, evaluation, and deployment
+by authorized parties only.
