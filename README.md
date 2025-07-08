@@ -53,4 +53,4 @@ SailSnap is a lightweight SaaS platform designed for tourism companies to effici
 
 ## License
 
-This project is licensed under a proprietary license. See the `LICENSE` file for details.
+This project is licensed under a proprietary license. See the [LICENSE.txt](./LICENSE.txt)file for details.
