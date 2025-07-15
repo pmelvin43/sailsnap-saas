@@ -27,8 +27,6 @@ SailSnap is a lightweight SaaS platform designed for tourism companies to effici
 
 ### Database
 - PostgreSQL (via Amazon RDS) – to store metadata such as galleries, purchases, and user data  
-  or  
-- DynamoDB – for a serverless, managed NoSQL alternative
 
 ### File and Email Services
 - Amazon S3 – for storing original and processed media files
