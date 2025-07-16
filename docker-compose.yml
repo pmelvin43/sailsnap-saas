@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./src/frontend
+    container_name: sailsnap-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./src/backend
+    container_name: sailsnap-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sailsnap
+      SPRING_DATASOURCE_USERNAME: sailsnap
+      SPRING_DATASOURCE_PASSWORD: sailsnappw
+
+volumes:
+  pgdata:
