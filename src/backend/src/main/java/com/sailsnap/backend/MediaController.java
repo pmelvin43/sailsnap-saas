@@ -35,13 +35,15 @@ public class MediaController {
 
     @GetMapping("/media")
     public ResponseEntity<List<String>> listFiles() throws IOException {
-        try (Stream<Path> paths = Files.walk(Paths.get(UPLOAD_DIR), 1)) {
-            List<String> filenames = paths
-                    .filter(Files::isRegularFile)
-                    .map(p -> p.getFileName().toString())
-                    .toList();
-            return ResponseEntity.ok(filenames);
-        }
+        // try (Stream<Path> paths = Files.walk(Paths.get(UPLOAD_DIR), 1)) {
+        //     List<String> filenames = paths
+        //             .filter(Files::isRegularFile)
+        //             .map(p -> p.getFileName().toString())
+        //             .toList();
+        //     return ResponseEntity.ok(filenames);
+        // }
+
+        return null;
     }
 
 }
