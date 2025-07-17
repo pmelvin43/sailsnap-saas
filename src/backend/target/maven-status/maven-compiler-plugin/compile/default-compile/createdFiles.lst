@@ -1,1 +1,4 @@
-com/sailsnap/backend/BackendApplication.class
+com\sailsnap\backend\SecurityConfig.class
+com\sailsnap\backend\BackendApplication.class
+com\sailsnap\backend\MediaController.class
+java\com\sailsnap\backend\repositories\S3Repository.class
