@@ -1,4 +1,4 @@
-package com.sailsnap.backend;
+package com.sailsnap.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
