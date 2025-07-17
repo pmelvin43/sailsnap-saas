@@ -27,15 +27,17 @@ public class S3Repository {
      * Uses the name of the business since it should be a unique name for them.
      * */
     public void createBucket(String businessName) {
+        String sanitizedBucketName = sanitizeBucketName(businessName);
+
         try {
             CreateBucketRequest createBucketRequest = CreateBucketRequest.builder()
-                    .bucket(businessName)
+                    .bucket(sanitizedBucketName)
                     .build();
 
             CreateBucketResponse createBucketResponse = s3Client.createBucket(createBucketRequest);
             log.info("Bucket {} created", createBucketResponse.location());
         } catch (S3Exception e) {
-            log.error("Error creating bucket", e);
+            log.error("Error creating bucket '{}': {}", businessName, e.awsErrorDetails().errorMessage(), e);
         }
     }
 
@@ -44,16 +46,19 @@ public class S3Repository {
      * @param businessName, unique name of the business, doubles as bucket name
      * @param key, where the files are stored, should be retrieved from the db before this call can be made
      * */
-    public ListObjectsV2Iterable listFiles(String businessName, String key) {
+    public ListObjectsV2Iterable retrieveObjects(String businessName, String key) {
+        String sanitizedBucketName = sanitizeBucketName(businessName);
+
         try {
+            log.info("Retrieving objects from S3: {}", sanitizedBucketName);
             ListObjectsV2Request request = ListObjectsV2Request.builder()
-                    .bucket(businessName)
+                    .bucket(sanitizedBucketName)
                     .prefix(key)
                     .build();
 
             return s3Client.listObjectsV2Paginator(request);
         } catch (S3Exception e) {
-            log.error("Error listing objects", e);
+            log.error("Error listing objects in bucket '{}' with prefix '{}'", businessName, key, e);
         }
 
         return null;
@@ -69,12 +74,13 @@ public class S3Repository {
      * */
     public void saveFile(InputStream compressedStream, String galleryName, String contentType, long contentLength, String businessName) {
         String key = createKey(galleryName);
+        String sanitizedBucketName = sanitizeBucketName(businessName);
 
         try {
             log.info("Saving file to S3: {}", key);
 
             PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(businessName)
+                    .bucket(sanitizedBucketName)
                     .key(key)
                     .contentType(contentType)
                     .contentLength(contentLength)
@@ -82,7 +88,7 @@ public class S3Repository {
 
             s3Client.putObject(request, RequestBody.fromInputStream(compressedStream, contentLength));
         } catch (S3Exception e) {
-            log.error("Error saving file to S3", e);
+            log.error("Error saving file to S3. Bucket: {}, Key: {}", businessName, key, e);
         }
     }
 
@@ -98,5 +104,22 @@ public class S3Repository {
         String formattedDateTime = now.format(formatter);
 
         return String.format("%s/%s", formattedDateTime, galleryName);
+    }
+
+    /**
+     * Sanitize bucket name to adhere to s3 conventions
+     * */
+    private String sanitizeBucketName(String businessName) {
+        String sanitizedBucketName = businessName.toLowerCase()
+                .replaceAll("[^a-z0-9.-]", "-")
+                .replaceAll("-{2,}", "-");
+
+        sanitizedBucketName = sanitizedBucketName.replaceAll("^[.-]+", "").replaceAll("[.-]+$", "");
+        if (sanitizedBucketName.length() < 3) {
+            sanitizedBucketName = sanitizedBucketName + "-".repeat(3 - sanitizedBucketName.length());
+        } else if (sanitizedBucketName.length() > 63) {
+            sanitizedBucketName = sanitizedBucketName.substring(0, 63).replaceAll("[.-]+$", "");
+        }
+        return sanitizedBucketName;
     }
 }
