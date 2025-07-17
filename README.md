@@ -15,15 +15,14 @@ SailSnap is a lightweight SaaS platform designed for tourism companies to effici
 ## Tech Stack
 
 ### Frontend
-- React – for building a responsive, dynamic web interface
-- Bootstrap – for fast, mobile-first UI styling
-- Axios – for API communication between frontend and backend
+- **React** (with **Vite** and **TypeScript**) – for building a fast, modern, and responsive user interface
+- **Axios** – for communicating with the backend REST API
 
 ### Backend
-- Java with Spring Boot – REST API development with scalable architecture
-- Spring Security (optional) – for authenticated operator access
-- Stripe SDK – payment processing
-- AWS SDK – integration with AWS services (S3, SES)
+- **Java with Spring Boot** – for REST API development and business logic
+- **Spring Security** – for authenticated operator access and secure API endpoints
+- **Stripe SDK** – for handling customer payments
+- **AWS SDK** – for integrating with Amazon S3 and SES
 
 ### Database
 - PostgreSQL (via Amazon RDS) – to store metadata such as galleries, purchases, and user data  
@@ -31,13 +30,14 @@ SailSnap is a lightweight SaaS platform designed for tourism companies to effici
 ### File and Email Services
 - Amazon S3 – for storing original and processed media files
 - Amazon SES – for sending gallery links to customers via email
-- AWS Lambda (optional) – for background processing tasks such as watermarking
+- AWS Lambda – for background processing tasks such as watermarking
 
 ### Hosting and DevOps
-- React frontend hosted on Vercel, CloudFront, or S3 Static Website Hosting
-- Spring Boot backend deployed using AWS Elastic Beanstalk, EC2, or Fargate
-- Docker – containerization for development and deployment
-- GitHub Actions – CI/CD pipeline for automated builds and deployments
+- **Docker** – containerization for local development and deployment
+- **GitHub Actions** – for continuous integration and deployment (CI/CD)
+- **Deployment Options**:
+  - **Frontend**: Deploy using Vercel, Amazon S3 + CloudFront, or another static hosting solution
+  - **Backend**: Deploy using AWS Elastic Beanstalk, EC2, or Fargate
 
 ## Getting Started
 
