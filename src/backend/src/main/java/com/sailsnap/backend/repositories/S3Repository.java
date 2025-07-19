@@ -1,5 +1,9 @@
 package com.sailsnap.backend.repositories;
 
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -10,10 +14,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 @Log4j2
 public class S3Repository {
     private final S3Client s3Client;
@@ -23,9 +23,10 @@ public class S3Repository {
     }
 
     /**
-     * Creates the bucket for a business, to be used on their registration so we can then save.
+     * Creates the bucket for a business, to be used on their registration so we can
+     * then save.
      * Uses the name of the business since it should be a unique name for them.
-     * */
+     */
     public void createBucket(String businessName) {
         String sanitizedBucketName = sanitizeBucketName(businessName);
 
@@ -43,9 +44,11 @@ public class S3Repository {
 
     /**
      * Returns a paginated object that will have all the pages in the bucket
+     * 
      * @param businessName, unique name of the business, doubles as bucket name
-     * @param key, where the files are stored, should be retrieved from the db before this call can be made
-     * */
+     * @param key,          where the files are stored, should be retrieved from the
+     *                      db before this call can be made
+     */
     public ListObjectsV2Iterable retrieveObjects(String businessName, String key) {
         String sanitizedBucketName = sanitizeBucketName(businessName);
 
@@ -66,13 +69,16 @@ public class S3Repository {
 
     /**
      * Saves the file in S3 using the passed gallery name and business name.
+     * 
      * @param compressedStream, the image as an input stream
-     * @param galleryName, the name of the gallery that the business specified
-     * @param contentType, image or video
-     * @param contentLength, size of the compressedStream
-     * @param businessName, the name of the business, this is also their bucket name
-     * */
-    public void saveFile(InputStream compressedStream, String galleryName, String contentType, long contentLength, String businessName) {
+     * @param galleryName,      the name of the gallery that the business specified
+     * @param contentType,      image or video
+     * @param contentLength,    size of the compressedStream
+     * @param businessName,     the name of the business, this is also their bucket
+     *                          name
+     */
+    public void saveFile(InputStream compressedStream, String galleryName, String contentType, long contentLength,
+            String businessName) {
         String key = createKey(galleryName);
         String sanitizedBucketName = sanitizeBucketName(businessName);
 
@@ -93,10 +99,12 @@ public class S3Repository {
     }
 
     /**
-     * This method uses the business, gallery name. As well as the date and time to create the key for batch-saving
-     * media files. For example, if lakers made a gallery called okanagan-lake, on July 5th 2025 the key would be:
+     * This method uses the business, gallery name. As well as the date and time to
+     * create the key for batch-saving
+     * media files. For example, if lakers made a gallery called okanagan-lake, on
+     * July 5th 2025 the key would be:
      * lakers/2025/07/05/okanagan-lake. Then all the files would be stored there
-     * */
+     */
     private String createKey(String galleryName) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -108,7 +116,7 @@ public class S3Repository {
 
     /**
      * Sanitize bucket name to adhere to s3 conventions
-     * */
+     */
     private String sanitizeBucketName(String businessName) {
         String sanitizedBucketName = businessName.toLowerCase()
                 .replaceAll("[^a-z0-9.-]", "-")
