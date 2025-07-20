@@ -3,6 +3,10 @@ package com.sailsnap.backend.repositories;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.stereotype.Repository;
 
 import lombok.extern.log4j.Log4j2;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -15,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 @Log4j2
+@Repository
 public class S3Repository {
     private final S3Client s3Client;
 
@@ -36,35 +41,35 @@ public class S3Repository {
                     .build();
 
             CreateBucketResponse createBucketResponse = s3Client.createBucket(createBucketRequest);
-            log.info("Bucket {} created", createBucketResponse.location());
+            log.info("Bucket {} created. Location: {}", sanitizedBucketName, createBucketResponse.location());
         } catch (S3Exception e) {
             log.error("Error creating bucket '{}': {}", businessName, e.awsErrorDetails().errorMessage(), e);
         }
     }
 
     /**
-     * Returns a paginated object that will have all the pages in the bucket
+     * Returns an optional paginated object that will have all the pages in the
+     * bucket
      * 
      * @param businessName, unique name of the business, doubles as bucket name
      * @param key,          where the files are stored, should be retrieved from the
      *                      db before this call can be made
      */
-    public ListObjectsV2Iterable retrieveObjects(String businessName, String key) {
+    public Optional<ListObjectsV2Iterable> retrieveObjects(String businessName, String key) {
         String sanitizedBucketName = sanitizeBucketName(businessName);
+        ListObjectsV2Request request = ListObjectsV2Request.builder()
+                .bucket(sanitizedBucketName)
+                .prefix(key)
+                .build();
 
         try {
             log.info("Retrieving objects from S3: {}", sanitizedBucketName);
-            ListObjectsV2Request request = ListObjectsV2Request.builder()
-                    .bucket(sanitizedBucketName)
-                    .prefix(key)
-                    .build();
 
-            return s3Client.listObjectsV2Paginator(request);
+            return Optional.of(s3Client.listObjectsV2Paginator(request));
         } catch (S3Exception e) {
             log.error("Error listing objects in bucket '{}' with prefix '{}'", businessName, key, e);
+            return Optional.empty();
         }
-
-        return null;
     }
 
     /**
@@ -80,6 +85,8 @@ public class S3Repository {
     public void saveFile(InputStream compressedStream, String galleryName, String contentType, long contentLength,
             String businessName) {
         String key = createKey(galleryName);
+        String objectName = getRandomId();
+        String objectKey = String.format("%s/%s", key, objectName);
         String sanitizedBucketName = sanitizeBucketName(businessName);
 
         try {
@@ -87,7 +94,7 @@ public class S3Repository {
 
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(sanitizedBucketName)
-                    .key(key)
+                    .key(objectKey)
                     .contentType(contentType)
                     .contentLength(contentLength)
                     .build();
@@ -114,8 +121,13 @@ public class S3Repository {
         return String.format("%s/%s", formattedDateTime, galleryName);
     }
 
+    private String getRandomId() {
+        return UUID.randomUUID().toString();
+    }
+
     /**
-     * Sanitize bucket name to adhere to s3 conventions
+     * Sanitize the bucket name to adhere to s3 conventions
+     * also added a random id suffix to increase uniqueness
      */
     private String sanitizeBucketName(String businessName) {
         String sanitizedBucketName = businessName.toLowerCase()
@@ -125,9 +137,10 @@ public class S3Repository {
         sanitizedBucketName = sanitizedBucketName.replaceAll("^[.-]+", "").replaceAll("[.-]+$", "");
         if (sanitizedBucketName.length() < 3) {
             sanitizedBucketName = sanitizedBucketName + "-".repeat(3 - sanitizedBucketName.length());
+            sanitizedBucketName = sanitizedBucketName.replaceAll("[.-]+$", "");
         } else if (sanitizedBucketName.length() > 63) {
             sanitizedBucketName = sanitizedBucketName.substring(0, 63).replaceAll("[.-]+$", "");
         }
-        return sanitizedBucketName;
+        return String.format("%s-%s", sanitizedBucketName, getRandomId());
     }
 }
