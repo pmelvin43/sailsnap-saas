@@ -2,4 +2,10 @@
 /home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/config/AwsConfig.java
 /home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/config/Credentials.java
 /home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/config/SecurityConfig.java
+/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/entities/Business.java
+/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/entities/Gallery.java
+/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/entities/Payment.java
+/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/repositories/BusinessRepository.java
+/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/repositories/GalleryRepository.java
+/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/repositories/PaymentRepository.java
 /home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/repositories/S3Repository.java
