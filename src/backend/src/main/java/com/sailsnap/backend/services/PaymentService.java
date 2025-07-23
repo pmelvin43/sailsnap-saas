@@ -22,10 +22,11 @@ public class PaymentService {
     @Autowired
     public PaymentService(PaymentRepository paymentRepo, @Value("${stripe.secret.key}") String stripeSecretKey) {
         this.paymentRepo = paymentRepo;
-        Stripe.apiKey = stripeSecretKey; // Initialize Stripe once
+        Stripe.apiKey = stripeSecretKey; // initialize stripe
     }
 
     @Transactional
+    @SuppressWarnings("UseSpecificCatch")
     public Payment createPaymentIntent(int businessId, double amount, String currency, Integer galleryId,
             String customerEmail) {
         try {
@@ -50,9 +51,6 @@ public class PaymentService {
             payment.setStatus("pending");
 
             paymentRepo.save(payment);
-
-            // Instead of overwriting the ID, just return the client secret separately.
-            // You can make a custom response object for the controller.
             return payment;
 
         } catch (Exception e) {
