@@ -1,11 +1,13 @@
 package com.sailsnap.backend.repositories;
 
-import com.sailsnap.backend.entities.Payment;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.sailsnap.backend.entities.Payment;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Integer> {
@@ -29,6 +31,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     List<Payment> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     // find all payments by a stripe payment ID
-    Payment findByStripePaymentIntentId(String paymentIntentId);
+    Optional<Payment> findByStripePaymentIntentId(String stripePaymentIntentId);
 
 }
