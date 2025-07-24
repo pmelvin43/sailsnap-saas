@@ -1,5 +1,0 @@
-/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/BackendApplication.java
-/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/config/AwsConfig.java
-/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/config/Credentials.java
-/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/config/SecurityConfig.java
-/home/pmelvin/Code/sailsnap-saas/src/backend/src/main/java/com/sailsnap/backend/repositories/S3Repository.java

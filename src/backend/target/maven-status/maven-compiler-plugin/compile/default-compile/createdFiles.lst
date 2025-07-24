@@ -1,5 +1,0 @@
-com/sailsnap/backend/config/SecurityConfig.class
-com/sailsnap/backend/repositories/S3Repository.class
-com/sailsnap/backend/BackendApplication.class
-com/sailsnap/backend/config/AwsConfig.class
-com/sailsnap/backend/config/Credentials.class
