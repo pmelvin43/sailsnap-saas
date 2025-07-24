@@ -26,19 +26,20 @@ public class PaymentService {
     }
 
     @Transactional
-    @SuppressWarnings("UseSpecificCatch")
+    @SuppressWarnings("UseSpecificCatch") // this is where the customer attempts to "checkout" for a photo album.
     public Payment createPaymentIntent(int businessId, double amount, String currency, Integer galleryId,
             String customerEmail) {
         try {
-            long amountInCents = (long) (amount * 100);
+            long amountInCents = (long) (amount * 100); // required to be in cents with a long for stripe
 
-            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
+            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder() // build the parameters needded for
+                                                                                   // string
                     .setAmount(amountInCents)
                     .setCurrency(currency)
                     .setReceiptEmail(customerEmail)
                     .build();
 
-            PaymentIntent intent = PaymentIntent.create(params);
+            PaymentIntent intent = PaymentIntent.create(params); // call stripe API and create an intent object
 
             Payment payment = new Payment();
             payment.setBusinessId(businessId);
@@ -48,9 +49,10 @@ public class PaymentService {
             payment.setCustomerEmail(customerEmail);
             payment.setStripePaymentIntentId(intent.getId());
             payment.setCreatedAt(LocalDateTime.now());
-            payment.setStatus("pending");
+            payment.setStatus("pending"); // this will be handled by the webhook
 
-            paymentRepo.save(payment);
+            paymentRepo.save(payment); // create our payment object with all metadata needed and save it to our payment
+                                       // repo
             return payment;
 
         } catch (Exception e) {
@@ -58,7 +60,8 @@ public class PaymentService {
         }
     }
 
-    public void handleStripeWebhook(String eventType, String paymentIntentId) {
+    public void handleStripeWebhook(String eventType, String paymentIntentId) { // use query set in the repo to find the
+                                                                                // payment
         paymentRepo.findByStripePaymentIntentId(paymentIntentId).ifPresent(payment -> {
             if ("payment_intent.succeeded".equals(eventType)) {
                 payment.setStatus("succeeded");
@@ -69,7 +72,7 @@ public class PaymentService {
         });
     }
 
-    public List<Payment> getPaymentsForBusiness(int businessId) {
+    public List<Payment> getPaymentsForBusiness(int businessId) { // just a list for businesses to get payments by id
         return paymentRepo.findByBusinessId(businessId);
     }
 }
