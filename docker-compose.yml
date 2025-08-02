@@ -24,6 +24,7 @@ services:
       AWS_ACCOUNT_ID: ${AWS_ACCOUNT_ID}
       AWS_SECRET_KEY: ${AWS_SECRET_KEY}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
 
 volumes:
   pgdata:
