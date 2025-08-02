@@ -79,4 +79,10 @@ public class Business {
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
+
+    @Column(name = "primary_color")
+    private String primaryColor;
+
+    @Column(name = "secondary_color")
+    private String secondaryColor;
 }
