@@ -32,7 +32,7 @@ public class Payment {
     @Column(name = "stripe_payment_id", nullable = false, unique = true)
     private String stripePaymentIntentId; // to query stripe later
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "status", nullable = false)
     private String status; // succeeded, pending, failed
 
     @Column(name = "created_at")
