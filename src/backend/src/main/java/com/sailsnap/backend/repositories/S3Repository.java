@@ -82,7 +82,7 @@ public class S3Repository {
      * @param businessName,     the name of the business, this is also their bucket
      *                          name
      */
-    public void saveFile(InputStream compressedStream, String galleryName, String contentType, long contentLength,
+    public String saveFile(InputStream compressedStream, String galleryName, String contentType, long contentLength,
             String businessName) {
         String key = createKey(galleryName);
         String objectName = getRandomId();
@@ -90,7 +90,7 @@ public class S3Repository {
         String sanitizedBucketName = sanitizeBucketName(businessName);
 
         try {
-            log.info("Saving file to S3: {}", key);
+            log.info("Saving file to S3: {}", objectKey);
 
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(sanitizedBucketName)
@@ -100,8 +100,12 @@ public class S3Repository {
                     .build();
 
             s3Client.putObject(request, RequestBody.fromInputStream(compressedStream, contentLength));
+
+            return objectKey; // ✅ return the actual key
+
         } catch (S3Exception e) {
-            log.error("Error saving file to S3. Bucket: {}, Key: {}", businessName, key, e);
+            log.error("Error saving file to S3. Bucket: {}, Key: {}", businessName, objectKey, e);
+            throw new RuntimeException("Failed to save file to S3", e);
         }
     }
 
