@@ -11,15 +11,15 @@ Each domain has a:
 
 ### Business
 
-DONE: Consists of accounts, branding, login / registration
+Consists of accounts, branding, login / registration
 
 ### Media
 
-NEXT: Consists of uploaded photos / videos, metadata, S3 integration
+Consists of uploaded photos / videos, metadata, S3 integration
 
 ### Gallery
 
-TODO: Groups media, generates sharable links, Stripe integration
+NEXT: Groups media, generates sharable links, Stripe integration
 
 ### Payment
 
