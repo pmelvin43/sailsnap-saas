@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sailsnap.backend.entities.Media;
+import com.sailsnap.backend.enums.CompressionLevel;
 import com.sailsnap.backend.services.MediaService;
 
 import java.util.List;
@@ -30,9 +31,10 @@ public class MediaController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("businessId") Long businessId,
             @RequestParam("galleryId") Long galleryId,
-            @RequestParam("businessName") String businessName) {
+            @RequestParam("businessName") String businessName,
+            @RequestParam(value = "compressionLevel", defaultValue = "MEDIUM") CompressionLevel compressionLevel) {
 
-        Media savedMedia = mediaService.uploadMedia(file, businessId, galleryId, businessName);
+        Media savedMedia = mediaService.uploadMedia(file, businessId, galleryId, businessName, compressionLevel);
         return ResponseEntity.ok(savedMedia);
     }
 

@@ -1,7 +1,6 @@
 package com.sailsnap.backend.services;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,13 +10,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.enums.FileType;
+import com.sailsnap.backend.enums.CompressionLevel;
 import com.sailsnap.backend.repositories.MediaRepository;
 import com.sailsnap.backend.repositories.S3Repository;
 
 import lombok.extern.log4j.Log4j2;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.coobird.thumbnailator.Thumbnails;
 
-@Log4j2
 @Service
+@Log4j2
 public class MediaService {
 
     @Autowired
@@ -26,33 +31,64 @@ public class MediaService {
     @Autowired
     private S3Repository s3Repository;
 
-    // need to be able to upload media to S3 and save it to the DB
-    public Media uploadMedia(MultipartFile file, Long businessId, Long galleryId, String businessName) {
-        try (InputStream inputStream = file.getInputStream()) {
-            String contentType = file.getContentType();
-            long fileSize = file.getSize();
+    public Media uploadMedia(MultipartFile file, Long businessId, Long galleryId, String businessName,
+            CompressionLevel compressionLevel) {
 
-            // determine if it's a photo or video
-            FileType fileType = contentType != null && contentType.startsWith("video")
-                    ? FileType.VIDEO
-                    : FileType.PHOTO;
+        String contentType = file.getContentType();
+        long originalSize = file.getSize();
+        FileType fileType = (contentType != null && contentType.startsWith("video")) ? FileType.VIDEO : FileType.PHOTO;
 
-            // save to S3
+        int videoBitrate = compressionLevel.getVideoBitrate();
+        double imageQuality = compressionLevel.getImageQuality();
+
+        InputStream inputStream = null;
+        long finalSize;
+
+        File inputTemp = null;
+        File outputTemp = null;
+
+        try {
+            if (fileType == FileType.PHOTO) {
+                byte[] compressedBytes = compressImage(file, imageQuality);
+                finalSize = compressedBytes.length;
+                inputStream = new ByteArrayInputStream(compressedBytes);
+            } else {
+                // Compress video safely
+                log.info("Compressing video file before upload...");
+
+                inputTemp = File.createTempFile("input-", ".mp4");
+                outputTemp = File.createTempFile("compressed-", ".mp4");
+
+                try {
+                    file.transferTo(inputTemp);
+                    compressVideo(inputTemp, outputTemp, videoBitrate);
+
+                    finalSize = outputTemp.length();
+                    inputStream = new FileInputStream(outputTemp);
+
+                } catch (Exception e) {
+                    log.error("Video compression failed, uploading original file.", e);
+                    inputStream = file.getInputStream();
+                    finalSize = originalSize;
+                }
+            }
+
+            // Upload to S3
             String s3Key = s3Repository.saveFile(
                     inputStream,
                     "gallery-" + galleryId,
                     contentType,
-                    fileSize,
+                    finalSize,
                     businessName);
 
-            // create and save the media entity
+            // Create DB record
             Media media = new Media();
             media.setBusinessId(businessId);
             media.setGalleryId(galleryId);
             media.setFileKey(s3Key);
             media.setFileType(fileType);
             media.setUploadedAt(LocalDateTime.now());
-            media.setFileSize(fileSize);
+            media.setFileSize(finalSize);
             media.setIsWatermarked(false);
 
             return mediaRepository.save(media);
@@ -60,15 +96,56 @@ public class MediaService {
         } catch (IOException e) {
             log.error("Error uploading media for business {}: {}", businessId, e.getMessage(), e);
             throw new RuntimeException("Failed to upload media", e);
+
+        } finally {
+            // Cleanup
+            try {
+                if (inputStream != null)
+                    inputStream.close();
+            } catch (IOException ignored) {
+            }
+
+            if (inputTemp != null && inputTemp.exists())
+                inputTemp.delete();
+            if (outputTemp != null && outputTemp.exists())
+                outputTemp.delete();
         }
     }
 
-    // need to be able to list media
+    private byte[] compressImage(MultipartFile file, double quality) throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Thumbnails.of(file.getInputStream())
+                    .scale(1.0)
+                    .outputQuality(quality)
+                    .toOutputStream(baos);
+            return baos.toByteArray();
+        }
+    }
+
+    private void compressVideo(File input, File output, int bitrate) throws IOException {
+        FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
+        FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
+
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .setInput(input.getAbsolutePath())
+                .overrideOutputFiles(true)
+                .addOutput(output.getAbsolutePath())
+                .setFormat("mp4")
+                .setVideoCodec("libx264")
+                .setVideoBitRate(bitrate)
+                .setAudioCodec("aac")
+                .setAudioBitRate(128_000)
+                .done();
+
+        new FFmpegExecutor(ffmpeg, ffprobe)
+                .createJob(builder)
+                .run();
+    }
+
     public List<Media> listMedia(int galleryId) {
         return mediaRepository.findByGalleryId(galleryId);
     }
 
-    // need to be able to delete media
     public boolean deleteMedia(int id) {
         mediaRepository.deleteById(id);
         return true;

@@ -121,8 +121,21 @@
             <artifactId>stripe-java</artifactId>
             <version>24.6.0</version>
         </dependency>
-    </dependencies>
 
+        <!-- Image Compression, thumbnailator-->
+        <dependency>
+            <groupId>net.coobird</groupId>
+            <artifactId>thumbnailator</artifactId>
+            <version>0.4.20</version>
+        </dependency>
+
+        <!-- Video Compression, ffmpeg-->
+        <dependency>
+            <groupId>net.bramp.ffmpeg</groupId>
+            <artifactId>ffmpeg</artifactId>
+            <version>0.7.0</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

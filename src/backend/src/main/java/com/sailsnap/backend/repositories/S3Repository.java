@@ -101,7 +101,7 @@ public class S3Repository {
 
             s3Client.putObject(request, RequestBody.fromInputStream(compressedStream, contentLength));
 
-            return objectKey; // ✅ return the actual key
+            return objectKey; // return the actual key
 
         } catch (S3Exception e) {
             log.error("Error saving file to S3. Bucket: {}, Key: {}", businessName, objectKey, e);
