@@ -13,21 +13,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "gallery") // table name in the database
-@Data // lombok will auto generate getters, setters, equals, hashCode, toString
+@Table(name = "gallery")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Gallery {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id; // primary key, auto-incremented
+    private int id;
 
     @Column(name = "business_id", nullable = false)
-    private int businessId; // foreign key, linking this gallery to a business
+    private int businessId;
 
     @Column(nullable = false)
     private String name;
+
+    @Column(name = "gallery_s3_key")
+    private String galleryS3Key;
 
     @Column(name = "public_url")
     private String publicUrl;
@@ -35,9 +38,12 @@ public class Gallery {
     @Column(name = "private_url")
     private String privateUrl;
 
+    @Column(name = "is_public")
+    private boolean isPublic = false;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "gallery_s3_key")
-    private String galleryS3Key;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
