@@ -3,6 +3,7 @@ package com.sailsnap.backend.services;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.coobird.thumbnailator.Thumbnails;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Service
 @Log4j2
 public class MediaService {
@@ -30,6 +33,12 @@ public class MediaService {
 
     @Autowired
     private S3Repository s3Repository;
+
+    @Value("${ffmpeg.path:/usr/bin/ffmpeg}")
+    private String ffmpegPath;
+
+    @Value("${ffprobe.path:/usr/bin/ffprobe}")
+    private String ffprobePath;
 
     public Media uploadMedia(MultipartFile file, Long businessId, Long galleryId, String businessName,
             CompressionLevel compressionLevel) {
@@ -123,8 +132,8 @@ public class MediaService {
     }
 
     private void compressVideo(File input, File output, int bitrate) throws IOException {
-        FFmpeg ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
-        FFprobe ffprobe = new FFprobe("/usr/bin/ffprobe");
+        FFmpeg ffmpeg = new FFmpeg(Objects.requireNonNull(ffmpegPath, "ffmpeg.path must be set"));
+        FFprobe ffprobe = new FFprobe(Objects.requireNonNull(ffprobePath, "ffprobe.path must be set"));
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(input.getAbsolutePath())
