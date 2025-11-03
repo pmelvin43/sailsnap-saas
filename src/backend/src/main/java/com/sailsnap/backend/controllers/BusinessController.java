@@ -18,18 +18,18 @@ public class BusinessController {
     private BusinessService businessService;
 
     @GetMapping("/profile")
-    public ResponseEntity<Business> getProfile(@RequestParam int id) {
+    public ResponseEntity<Business> getProfile(@RequestParam long id) {
         return ResponseEntity.ok(businessService.getProfile(id));
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<Business> updateLogo(@RequestParam int id, @RequestParam String logoKey) {
+    public ResponseEntity<Business> updateLogo(@RequestParam long id, @RequestParam String logoKey) {
         return ResponseEntity.ok(businessService.updateLogo(id, logoKey));
     }
 
     @PutMapping("/colors")
     public ResponseEntity<Business> updateColors(
-            @RequestParam int id,
+            @RequestParam long id,
             @RequestParam String primaryColor,
             @RequestParam String secondaryColor) {
         return ResponseEntity.ok(businessService.updateColors(id, primaryColor, secondaryColor));

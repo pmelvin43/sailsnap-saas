@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.sailsnap.backend.entities.Business;
 
 @Repository
-public interface BusinessRepository extends JpaRepository<Business, Integer> {
+public interface BusinessRepository extends JpaRepository<Business, Long> {
 
     // find a business by its exact name
     Business findByBusinessName(String businessName);

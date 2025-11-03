@@ -21,10 +21,10 @@ public class Gallery {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "business_id", nullable = false)
-    private int businessId;
+    private Long businessId;
 
     @Column(nullable = false)
     private String name;

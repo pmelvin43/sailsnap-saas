@@ -21,7 +21,7 @@ public class Business {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id; // Primary key, auto-incremented
+    private long id; // Primary key, auto-incremented
 
     @Column(name = "business_name", nullable = false, unique = true)
     private String businessName;

@@ -151,11 +151,11 @@ public class MediaService {
                 .run();
     }
 
-    public List<Media> listMedia(int galleryId) {
+    public List<Media> listMedia(long galleryId) {
         return mediaRepository.findByGalleryId(galleryId);
     }
 
-    public boolean deleteMedia(int id) {
+    public boolean deleteMedia(long id) {
         mediaRepository.deleteById(id);
         return true;
     }

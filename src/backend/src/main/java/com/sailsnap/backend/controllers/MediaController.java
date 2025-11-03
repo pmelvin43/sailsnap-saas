@@ -21,7 +21,7 @@ public class MediaController {
 
     // list all media in a gallery
     @GetMapping
-    public ResponseEntity<List<Media>> listGalleryMedia(@RequestParam int galleryId) {
+    public ResponseEntity<List<Media>> listGalleryMedia(@RequestParam long galleryId) {
         return ResponseEntity.ok(mediaService.listMedia(galleryId));
     }
 
@@ -40,7 +40,7 @@ public class MediaController {
 
     // delete media
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMedia(@PathVariable int id) {
+    public ResponseEntity<String> deleteMedia(@PathVariable long id) {
         boolean deleted = mediaService.deleteMedia(id);
         if (deleted) {
             return ResponseEntity.ok("Media deleted successfully");
