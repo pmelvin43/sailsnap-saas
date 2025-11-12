@@ -60,11 +60,17 @@ public class PaymentService {
         }
     }
 
-    public void handleStripeWebhook(String eventType, String paymentIntentId) { // use query set in the repo to find the
-                                                                                // payment
+    @Autowired
+    private GalleryService galleryService;
+
+    public void handleStripeWebhook(String eventType, String paymentIntentId) {
         paymentRepo.findByStripePaymentIntentId(paymentIntentId).ifPresent(payment -> {
             if ("payment_intent.succeeded".equals(eventType)) {
                 payment.setStatus("succeeded");
+                // makr galelry as paid
+                if (payment.getGalleryId() != null) {
+                    galleryService.markGalleryAsPaid(Long.valueOf(payment.getGalleryId()));
+                }
             } else if ("payment_intent.payment_failed".equals(eventType)) {
                 payment.setStatus("failed");
             }
