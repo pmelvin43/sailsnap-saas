@@ -2,6 +2,7 @@ package com.sailsnap.backend.repositories;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,7 +16,7 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
     Business findByBusinessName(String businessName);
 
     // find a business by email (useful for login)
-    Business findByEmail(String email);
+    Optional<Business> findByEmail(String email);
 
     // search for businesses by partial name (case-sensitive by default)
     List<Business> findByBusinessNameContaining(String keyword);

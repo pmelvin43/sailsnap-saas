@@ -43,11 +43,14 @@ public class BusinessService {
     }
 
     public Business login(String email, String password) {
-        Business business = businessRepository.findByEmail(email);
-        if (business == null || !business.getPassword().equals(password)) {
-            // TODO: hash and compare passwords properly
+        Business business = businessRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        
+        // TODO: Use proper password hashing (BCrypt)
+        if (!business.getPassword().equals(password)) {
             throw new RuntimeException("Invalid email or password");
         }
+        
         business.setLastLoginAt(LocalDateTime.now());
         return businessRepository.save(business);
     }
