@@ -46,4 +46,7 @@ public class Gallery {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "is_paid")
+    private boolean isPaid = false;
 }
