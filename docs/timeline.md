@@ -51,9 +51,29 @@ Service method: sendGalleryEmail(galleryId, email) → include public URL or sha
 Use SMTP / third-party service for real emails.
 Frontend can trigger this via form.
 
+FUTURE: 
+
+Email integration (sendGalleryEmail()).
+
+Optional URL tokenization or expiry for shared galleries.
+
+Watermarked thumbnail generation (currently handled on frontend).
+
+Logging, error handling, or audit trails for paid/unpaid state changes.
+
 ### Payment
 
 TODO: Customer purchases, Stripe integration
+
+FUTURE:
+
+Email receipts to customers
+
+Tokenized share links
+
+Optional expiry for shared galleries
+
+More detailed payment tracking/reporting
 
 ### Subscription
 
