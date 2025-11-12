@@ -2,6 +2,7 @@ package com.sailsnap.backend.repositories;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -9,10 +10,10 @@ import org.springframework.stereotype.Repository;
 import com.sailsnap.backend.entities.Gallery;
 
 @Repository
-public interface GalleryRepository extends JpaRepository<Gallery, Integer> {
+public interface GalleryRepository extends JpaRepository<Gallery, Long> {
 
     // find all galleries for a specific business by its ID
-    List<Gallery> findByBusinessId(int businessId);
+    List<Gallery> findByBusinessId(Long businessId);
 
     // find a gallery by its name
     List<Gallery> findByNameContaining(String keyword);
@@ -29,6 +30,9 @@ public interface GalleryRepository extends JpaRepository<Gallery, Integer> {
     // find galleries by business ID and creation date range, for example:
     // "give me all galleries for business ID 1 created between 2023-01-01 and
     // 2023-01-31"
-    List<Gallery> findByBusinessIdAndCreatedAtBetween(int businessId, LocalDateTime start, LocalDateTime end);
+    List<Gallery> findByBusinessIdAndCreatedAtBetween(Long businessId, LocalDateTime start, LocalDateTime end);
 
+    Optional<Gallery> findByPublicUrl(String publicUrl);
+
+    List<Gallery> findByIsPublicTrue();
 }

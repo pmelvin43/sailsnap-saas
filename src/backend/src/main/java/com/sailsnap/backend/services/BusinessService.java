@@ -14,19 +14,19 @@ public class BusinessService {
     @Autowired
     private BusinessRepository businessRepository;
 
-    public Business getProfile(int id) {
+    public Business getProfile(long id) {
         return businessRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Business not found"));
     }
 
-    public Business updateLogo(int id, String logoKey) {
+    public Business updateLogo(long id, String logoKey) {
         Business business = getProfile(id);
         business.setLogoKey(logoKey);
         business.setUpdatedAt(LocalDateTime.now());
         return businessRepository.save(business);
     }
 
-    public Business updateColors(int id, String primary, String secondary) {
+    public Business updateColors(long id, String primary, String secondary) {
         Business business = getProfile(id);
         business.setPrimaryColor(primary);
         business.setSecondaryColor(secondary);

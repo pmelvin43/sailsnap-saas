@@ -21,6 +21,36 @@ Consists of uploaded photos / videos, metadata, S3 integration
 
 NEXT: Groups media, generates sharable links, Stripe integration
 
+Notes on gallery as this will be built iteratively:
+
+Phase 1: Core Gallery MVP
+
+Fields: id, businessId, name, createdAt, updatedAt, privateUrl, publicUrl, isPublic.
+Backend functionality: create gallery, list galleries, get gallery.
+Frontend: display gallery info and media, dynamically apply watermark if isPublic=false.
+No tokenization, no email, no expiry yet.
+Use mock S3 for testing media upload/download.
+
+Phase 2: Optional Expiry & Public/Private Separation
+
+Add shareToken (UUID) or reuse publicUrl for shareable links.
+Add expiresAt if you want time-limited access.
+Service: generate token or public URL, validate token/expiry on access.
+Controller: endpoint for shared gallery access (GET /galleries/share/downloads?token=xxx).
+This lets you separate public (unpaid/preview) vs private (paid/full) galleries.
+
+Phase 3: URL Generation & Tokenization
+
+Create secure, unique URLs for each gallery.
+Ensure backend can verify token on access.
+Frontend still uses these URLs to request media.
+
+Phase 4: Email Service Integration
+
+Service method: sendGalleryEmail(galleryId, email) → include public URL or share token.
+Use SMTP / third-party service for real emails.
+Frontend can trigger this via form.
+
 ### Payment
 
 TODO: Customer purchases, Stripe integration
