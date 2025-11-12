@@ -47,6 +47,13 @@ public class GalleryService {
                 .orElseThrow(() -> new RuntimeException("Shared gallery not found or not public"));
     }
 
+    // mark gallery as paid from payment service
+    public void markGalleryAsPaid(Long galleryId) {
+        Gallery gallery = getGallery(galleryId);
+        gallery.setPaid(true);
+        galleryRepository.save(gallery);
+    }
+
     // placeholder: send gallery via email (future)
     public String sendGalleryEmail(Long galleryId, String email) {
         Gallery gallery = getGallery(galleryId);
