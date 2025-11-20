@@ -1,5 +1,6 @@
 package com.sailsnap.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -8,16 +9,29 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import static com.sailsnap.backend.config.Credentials.AWS_REGION;
-import static com.sailsnap.backend.config.Credentials.AWS_SECRET_KEY;
-import static com.sailsnap.backend.config.Credentials.AWS_ACCESS_KEY;
-
 @Configuration
 public class AwsConfig {
 
+    @Value("${AWS_REGION:us-west-1}") // Default to us-west-1 if not set
+    private String awsRegion;
+
+    @Value("${AWS_ACCESS_KEY:}") // Empty default if not set
+    private String awsAccessKey;
+
+    @Value("${AWS_SECRET_KEY:}") // Empty default if not set
+    private String awsSecretKey;
+
     @Bean
     public AwsCredentialsProvider staticAwsCredentialsProvider() {
-        AwsBasicCredentials creds = AwsBasicCredentials.create(AWS_ACCESS_KEY, AWS_SECRET_KEY);
+        // Check if credentials are provided (not empty)
+        if (awsAccessKey == null || awsAccessKey.isEmpty() ||
+                awsSecretKey == null || awsSecretKey.isEmpty()) {
+            // If no credentials provided, use default credential chain
+            // This will work with IAM roles in production
+            return software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider.create();
+        }
+
+        AwsBasicCredentials creds = AwsBasicCredentials.create(awsAccessKey, awsSecretKey);
         return StaticCredentialsProvider.create(creds);
     }
 
@@ -31,6 +45,6 @@ public class AwsConfig {
 
     @Bean
     public Region provideRegion() {
-        return Region.of(AWS_REGION);
+        return Region.of(awsRegion); // Use the injected value, not the static import
     }
 }
