@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.enums.FileType;
 import com.sailsnap.backend.enums.CompressionLevel;
+import com.sailsnap.backend.repositories.BusinessRepository;
 import com.sailsnap.backend.repositories.MediaRepository;
 import com.sailsnap.backend.repositories.S3Repository;
 

@@ -7,12 +7,16 @@ import org.springframework.stereotype.Service;
 
 import com.sailsnap.backend.entities.Business;
 import com.sailsnap.backend.repositories.BusinessRepository;
+import com.sailsnap.backend.repositories.S3Repository;
 
 @Service
 public class BusinessService {
 
     @Autowired
     private BusinessRepository businessRepository;
+
+    @Autowired // Make sure this is added
+    private S3Repository s3Repository;
 
     public Business getProfile(long id) {
         return businessRepository.findById(id)
@@ -39,18 +43,21 @@ public class BusinessService {
         business.setUpdatedAt(LocalDateTime.now());
         business.setActive(true);
         // TODO: hash password
-        return businessRepository.save(business);
+
+        Business savedBusiness = businessRepository.save(business);
+        s3Repository.createBucket(business.getBusinessName());
+        return savedBusiness;
     }
 
     public Business login(String email, String password) {
         Business business = businessRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
-        
+
         // TODO: Use proper password hashing (BCrypt)
         if (!business.getPassword().equals(password)) {
             throw new RuntimeException("Invalid email or password");
         }
-        
+
         business.setLastLoginAt(LocalDateTime.now());
         return businessRepository.save(business);
     }
