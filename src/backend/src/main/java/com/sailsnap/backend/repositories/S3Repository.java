@@ -1,8 +1,11 @@
 package com.sailsnap.backend.repositories;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,18 +16,24 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 @Log4j2
 @Repository
 public class S3Repository {
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
-    public S3Repository(S3Client s3Client) {
+    public S3Repository(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
+        this.s3Presigner = s3Presigner;
     }
 
     /**
@@ -89,6 +98,13 @@ public class S3Repository {
         String objectKey = String.format("%s/%s", key, objectName);
         String sanitizedBucketName = sanitizeBucketName(businessName);
 
+        log.info("=== DEBUG S3 UPLOAD ===");
+        log.info("Business name: '{}'", businessName);
+        log.info("Sanitized bucket name: '{}'", sanitizedBucketName);
+        log.info("Object key: '{}'", objectKey);
+        log.info("Content type: '{}'", contentType);
+        log.info("Content length: '{}'", contentLength);
+
         try {
             log.info("Saving file to S3: {}", objectKey);
 
@@ -99,13 +115,77 @@ public class S3Repository {
                     .contentLength(contentLength)
                     .build();
 
+            log.info("PutObjectRequest - Bucket: '{}', Key: '{}'",
+                    request.bucket(), request.key());
+
             s3Client.putObject(request, RequestBody.fromInputStream(compressedStream, contentLength));
 
+            log.info("=== UPLOAD SUCCESS ===");
             return objectKey; // return the actual key
 
         } catch (S3Exception e) {
-            log.error("Error saving file to S3. Bucket: {}, Key: {}", businessName, objectKey, e);
+            log.error("=== UPLOAD FAILED ===");
+            log.error("Error details: {}", e.awsErrorDetails());
+            log.error("Status code: {}", e.statusCode());
+            log.error("Error message: {}", e.getMessage());
+            log.error("Error saving file to S3. Bucket: {}, Key: {}", sanitizedBucketName, objectKey, e);
             throw new RuntimeException("Failed to save file to S3", e);
+        }
+    }
+
+    /**
+     * Generates presigned URLs for temporary access to media files
+     */
+    public String generatePresignedUrl(String businessName, String fileKey, Duration expiration) {
+        String sanitizedBucketName = sanitizeBucketName(businessName);
+
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(sanitizedBucketName)
+                    .key(fileKey)
+                    .build();
+
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(expiration)
+                    .build();
+
+            PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
+            return presignedRequest.url().toString();
+
+        } catch (S3Exception e) {
+            log.error("Error generating presigned URL for {}/{}", businessName, fileKey, e);
+            throw new RuntimeException("Failed to generate access URL", e);
+        }
+    }
+
+    /**
+     * Gets all media objects for a gallery
+     */
+    public List<String> getGalleryMediaUrls(String businessName, String galleryPrefix, Duration expiration) {
+        String sanitizedBucketName = sanitizeBucketName(businessName);
+        List<String> mediaUrls = new ArrayList<>();
+
+        try {
+            ListObjectsV2Request request = ListObjectsV2Request.builder()
+                    .bucket(sanitizedBucketName)
+                    .prefix(galleryPrefix)
+                    .build();
+
+            ListObjectsV2Iterable result = s3Client.listObjectsV2Paginator(request);
+
+            result.stream()
+                    .flatMap(response -> response.contents().stream())
+                    .forEach(s3Object -> {
+                        String presignedUrl = generatePresignedUrl(businessName, s3Object.key(), expiration);
+                        mediaUrls.add(presignedUrl);
+                    });
+
+            return mediaUrls;
+
+        } catch (S3Exception e) {
+            log.error("Error retrieving gallery media for business '{}'", businessName, e);
+            throw new RuntimeException("Failed to retrieve gallery media", e);
         }
     }
 

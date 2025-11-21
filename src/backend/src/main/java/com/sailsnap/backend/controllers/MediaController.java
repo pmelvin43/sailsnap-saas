@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sailsnap.backend.dto.MediaResponse;
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.enums.CompressionLevel;
 import com.sailsnap.backend.services.MediaService;
@@ -47,5 +48,29 @@ public class MediaController {
         } else {
             return ResponseEntity.status(500).body("Failed to delete media");
         }
+    }
+
+    /**
+     * Get all media for a gallery with S3 URLs for frontend display
+     */
+    @GetMapping("/gallery/{galleryId}")
+    public ResponseEntity<List<MediaResponse>> getGalleryMedia(
+            @PathVariable long galleryId,
+            @RequestParam String businessName) {
+
+        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessName);
+        return ResponseEntity.ok(media);
+    }
+
+    /**
+     * Get direct S3 URLs for gallery media (alternative approach)
+     */
+    @GetMapping("/gallery/{galleryId}/urls")
+    public ResponseEntity<List<String>> getGalleryMediaUrls(
+            @PathVariable long galleryId,
+            @RequestParam String businessName) {
+
+        List<String> urls = mediaService.getGalleryMediaUrlsDirect(businessName, galleryId);
+        return ResponseEntity.ok(urls);
     }
 }

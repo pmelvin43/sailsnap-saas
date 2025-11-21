@@ -12,6 +12,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
 public class AwsConfig {
@@ -25,7 +26,7 @@ public class AwsConfig {
     @Value("${AWS_SECRET_KEY:test}")
     private String awsSecretKey;
 
-    @Value("${AWS_ENDPOINT:}")  // ← ADD THIS
+    @Value("${AWS_ENDPOINT:}") // ← ADD THIS
     private String awsEndpoint;
 
     @Bean
@@ -33,10 +34,9 @@ public class AwsConfig {
         // For LocalStack, always use test credentials
         if (isLocalStack()) {
             return StaticCredentialsProvider.create(
-                AwsBasicCredentials.create("test", "test")
-            );
+                    AwsBasicCredentials.create("test", "test"));
         }
-        
+
         // Check if credentials are provided (not empty)
         if (awsAccessKey == null || awsAccessKey.isEmpty() ||
                 awsSecretKey == null || awsSecretKey.isEmpty()) {
@@ -56,9 +56,23 @@ public class AwsConfig {
         // If using LocalStack, override endpoint and enable path style
         if (isLocalStack()) {
             builder.endpointOverride(URI.create(awsEndpoint))
-                   .serviceConfiguration(S3Configuration.builder()
-                       .pathStyleAccessEnabled(true)
-                       .build());
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build());
+        }
+
+        return builder.build();
+    }
+
+    @Bean
+    public S3Presigner provideS3Presigner(Region region, AwsCredentialsProvider credentialsProvider) {
+        S3Presigner.Builder builder = S3Presigner.builder()
+                .region(region)
+                .credentialsProvider(credentialsProvider);
+
+        // If using LocalStack, override endpoint
+        if (isLocalStack()) {
+            builder.endpointOverride(URI.create(awsEndpoint));
         }
 
         return builder.build();

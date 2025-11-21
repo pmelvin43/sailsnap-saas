@@ -4,6 +4,8 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
+import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,9 +14,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.enums.FileType;
 import com.sailsnap.backend.enums.CompressionLevel;
-import com.sailsnap.backend.repositories.BusinessRepository;
 import com.sailsnap.backend.repositories.MediaRepository;
 import com.sailsnap.backend.repositories.S3Repository;
+import com.sailsnap.backend.dto.MediaResponse;
 
 import lombok.extern.log4j.Log4j2;
 import net.bramp.ffmpeg.FFmpeg;
@@ -150,6 +152,39 @@ public class MediaService {
         new FFmpegExecutor(ffmpeg, ffprobe)
                 .createJob(builder)
                 .run();
+    }
+
+    /**
+     * Get media with actual S3 URLs for frontend display
+     */
+    public List<MediaResponse> getGalleryMedia(long galleryId, String businessName) {
+        List<Media> mediaList = mediaRepository.findByGalleryId(galleryId);
+        List<MediaResponse> response = new ArrayList<>();
+
+        // Generate 1-hour temporary access URLs
+        java.time.Duration urlExpiration = java.time.Duration.ofHours(1);
+
+        for (Media media : mediaList) {
+            String presignedUrl = s3Repository.generatePresignedUrl(
+                    businessName,
+                    media.getFileKey(),
+                    urlExpiration);
+
+            MediaResponse mediaResponse = new MediaResponse(media, presignedUrl);
+            response.add(mediaResponse);
+        }
+
+        return response;
+    }
+
+    /**
+     * Get all media URLs directly from S3 (bypasses database)
+     */
+    public List<String> getGalleryMediaUrlsDirect(String businessName, long galleryId) {
+        String galleryPrefix = String.format("gallery-%d", galleryId);
+        java.time.Duration urlExpiration = java.time.Duration.ofHours(1);
+
+        return s3Repository.getGalleryMediaUrls(businessName, galleryPrefix, urlExpiration);
     }
 
     public List<Media> listMedia(long galleryId) {

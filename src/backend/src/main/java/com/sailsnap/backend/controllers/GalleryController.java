@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.sailsnap.backend.dto.MediaResponse;
 import com.sailsnap.backend.entities.Gallery;
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.services.GalleryService;
@@ -45,9 +46,13 @@ public class GalleryController {
     }
 
     // get media for a gallery
-    @GetMapping("/{id}/media")
-    public ResponseEntity<List<Media>> getGalleryMedia(@PathVariable Long id) {
-        return ResponseEntity.ok(mediaService.listMedia(id));
+    @GetMapping("/{galleryId}/media")
+    public ResponseEntity<List<MediaResponse>> getGalleryMedia(
+            @PathVariable long galleryId,
+            @RequestParam String businessName) {
+
+        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessName);
+        return ResponseEntity.ok(media);
     }
 
     // placeholder for sending gallery email
