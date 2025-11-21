@@ -15,7 +15,7 @@ public class BusinessService {
     @Autowired
     private BusinessRepository businessRepository;
 
-    @Autowired // Make sure this is added
+    @Autowired
     private S3Repository s3Repository;
 
     public Business getProfile(long id) {
@@ -42,10 +42,12 @@ public class BusinessService {
         business.setCreatedAt(LocalDateTime.now());
         business.setUpdatedAt(LocalDateTime.now());
         business.setActive(true);
-        // TODO: hash password
+        
+        // Let S3Repository handle bucket creation and naming
+        String bucketName = s3Repository.createBucketForBusiness(business.getBusinessName());
+        business.setBucketName(bucketName);
 
         Business savedBusiness = businessRepository.save(business);
-        s3Repository.createBucket(business.getBusinessName());
         return savedBusiness;
     }
 

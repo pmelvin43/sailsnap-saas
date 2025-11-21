@@ -85,4 +85,7 @@ public class Business {
 
     @Column(name = "secondary_color")
     private String secondaryColor;
+
+    @Column(name = "bucket_name")
+    private String bucketName;
 }

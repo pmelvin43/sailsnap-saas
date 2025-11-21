@@ -32,10 +32,9 @@ public class MediaController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("businessId") Long businessId,
             @RequestParam("galleryId") Long galleryId,
-            @RequestParam("businessName") String businessName,
             @RequestParam(value = "compressionLevel", defaultValue = "MEDIUM") CompressionLevel compressionLevel) {
 
-        Media savedMedia = mediaService.uploadMedia(file, businessId, galleryId, businessName, compressionLevel);
+        Media savedMedia = mediaService.uploadMedia(file, businessId, galleryId, compressionLevel);
         return ResponseEntity.ok(savedMedia);
     }
 
@@ -56,9 +55,9 @@ public class MediaController {
     @GetMapping("/gallery/{galleryId}")
     public ResponseEntity<List<MediaResponse>> getGalleryMedia(
             @PathVariable long galleryId,
-            @RequestParam String businessName) {
+            @RequestParam Long businessId) { // ← Changed from businessName to businessId
 
-        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessName);
+        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessId);
         return ResponseEntity.ok(media);
     }
 
@@ -68,9 +67,9 @@ public class MediaController {
     @GetMapping("/gallery/{galleryId}/urls")
     public ResponseEntity<List<String>> getGalleryMediaUrls(
             @PathVariable long galleryId,
-            @RequestParam String businessName) {
+            @RequestParam Long businessId) { // ← Changed from businessName to businessId
 
-        List<String> urls = mediaService.getGalleryMediaUrlsDirect(businessName, galleryId);
+        List<String> urls = mediaService.getGalleryMediaUrlsDirect(businessId, galleryId);
         return ResponseEntity.ok(urls);
     }
 }

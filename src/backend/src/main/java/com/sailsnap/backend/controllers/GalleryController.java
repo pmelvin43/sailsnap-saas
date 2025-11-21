@@ -49,10 +49,20 @@ public class GalleryController {
     @GetMapping("/{galleryId}/media")
     public ResponseEntity<List<MediaResponse>> getGalleryMedia(
             @PathVariable long galleryId,
-            @RequestParam String businessName) {
+            @RequestParam Long businessId) { // ← Changed from businessName to businessId
 
-        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessName);
+        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessId);
         return ResponseEntity.ok(media);
+    }
+
+    // get media URLs directly from S3 (bypasses database)
+    @GetMapping("/{galleryId}/media-urls")
+    public ResponseEntity<List<String>> getGalleryMediaUrlsDirect(
+            @PathVariable long galleryId,
+            @RequestParam Long businessId) { // ← Add this new endpoint if needed
+
+        List<String> mediaUrls = mediaService.getGalleryMediaUrlsDirect(businessId, galleryId);
+        return ResponseEntity.ok(mediaUrls);
     }
 
     // placeholder for sending gallery email
