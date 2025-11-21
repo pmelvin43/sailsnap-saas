@@ -1,5 +1,7 @@
 package com.sailsnap.backend.config;
 
+import java.net.URI;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +10,7 @@ import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 
 @Configuration
 public class AwsConfig {
@@ -37,6 +40,20 @@ public class AwsConfig {
 
     @Bean
     public S3Client provideS3Client(Region region, AwsCredentialsProvider credentialsProvider) {
+        // If using LocalStack, override endpoint
+        if ("localstack".equals(System.getProperty("env"))) {
+            return S3Client.builder()
+                    .endpointOverride(URI.create("http://localhost:4566")) // localstack endpoint
+                    .region(region)
+                    .credentialsProvider(StaticCredentialsProvider.create(
+                            AwsBasicCredentials.create("test", "test")))
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true) // required for socalStack
+                            .build())
+                    .build();
+        }
+
+        // Normal AWS S3
         return S3Client.builder()
                 .region(region)
                 .credentialsProvider(credentialsProvider)
@@ -45,6 +62,6 @@ public class AwsConfig {
 
     @Bean
     public Region provideRegion() {
-        return Region.of(awsRegion); // Use the injected value, not the static import
+        return Region.of(awsRegion);
     }
 }

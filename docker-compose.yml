@@ -39,6 +39,8 @@ services:
       AWS_SECRET_KEY: ${AWS_SECRET_KEY}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+    command: >
+      java -Denv=${ENV:-aws} -jar /app/sailsnap-saas.jar
     ports:
       - "8080:8080"
 
