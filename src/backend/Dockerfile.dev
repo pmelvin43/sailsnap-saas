@@ -1,0 +1,10 @@
+FROM maven:3.9-eclipse-temurin-17
+WORKDIR /app
+
+# Install FFmpeg for media processing (same as prod)
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+CMD ["mvn", "spring-boot:run"]

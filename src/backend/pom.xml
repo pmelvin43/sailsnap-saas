@@ -129,6 +129,14 @@
             <artifactId>ffmpeg</artifactId>
             <version>0.7.0</version>
         </dependency>
+
+        <!-- Dev tools (for hotreload), devtools-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
