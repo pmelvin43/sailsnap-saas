@@ -4,16 +4,19 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sailsnap.backend.entities.Business;
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.enums.FileType;
 import com.sailsnap.backend.enums.CompressionLevel;
 import com.sailsnap.backend.repositories.MediaRepository;
 import com.sailsnap.backend.repositories.S3Repository;
+import com.sailsnap.backend.dto.MediaResponse;
 
 import lombok.extern.log4j.Log4j2;
 import net.bramp.ffmpeg.FFmpeg;
@@ -34,14 +37,19 @@ public class MediaService {
     @Autowired
     private S3Repository s3Repository;
 
+    @Autowired
+    private BusinessService businessService;
+
     @Value("${ffmpeg.path:/usr/bin/ffmpeg}")
     private String ffmpegPath;
 
     @Value("${ffprobe.path:/usr/bin/ffprobe}")
     private String ffprobePath;
 
-    public Media uploadMedia(MultipartFile file, Long businessId, Long galleryId, String businessName,
+    public Media uploadMedia(MultipartFile file, Long businessId, Long galleryId,
             CompressionLevel compressionLevel) {
+
+        Business business = businessService.getProfile(businessId);
 
         String contentType = file.getContentType();
         long originalSize = file.getSize();
@@ -88,7 +96,7 @@ public class MediaService {
                     "gallery-" + galleryId,
                     contentType,
                     finalSize,
-                    businessName);
+                    business.getBucketName());
 
             // Create DB record
             Media media = new Media();
@@ -149,6 +157,43 @@ public class MediaService {
         new FFmpegExecutor(ffmpeg, ffprobe)
                 .createJob(builder)
                 .run();
+    }
+
+    /**
+     * Get media with actual S3 URLs for frontend display
+     */
+    public List<MediaResponse> getGalleryMedia(long galleryId, Long businessId) {
+        List<Media> mediaList = mediaRepository.findByGalleryId(galleryId);
+        List<MediaResponse> response = new ArrayList<>();
+
+        Business business = businessService.getProfile(businessId);
+
+        // Generate 1-hour temporary access URLs
+        java.time.Duration urlExpiration = java.time.Duration.ofHours(1);
+
+        for (Media media : mediaList) {
+            String presignedUrl = s3Repository.generatePresignedUrl(
+                    business.getBucketName(),
+                    media.getFileKey(),
+                    urlExpiration);
+
+            MediaResponse mediaResponse = new MediaResponse(media, presignedUrl);
+            response.add(mediaResponse);
+        }
+
+        return response;
+    }
+
+    /**
+     * Get all media URLs directly from S3 (bypasses database)
+     */
+    public List<String> getGalleryMediaUrlsDirect(Long businessId, long galleryId) {
+        Business business = businessService.getProfile(businessId);
+
+        String galleryPrefix = String.format("gallery-%d", galleryId);
+        java.time.Duration urlExpiration = java.time.Duration.ofHours(1);
+
+        return s3Repository.getGalleryMediaUrls(business.getBucketName(), galleryPrefix, urlExpiration);
     }
 
     public List<Media> listMedia(long galleryId) {

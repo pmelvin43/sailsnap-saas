@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.sailsnap.backend.dto.MediaResponse;
 import com.sailsnap.backend.entities.Gallery;
-import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.services.GalleryService;
 import com.sailsnap.backend.services.MediaService;
 
@@ -45,9 +45,23 @@ public class GalleryController {
     }
 
     // get media for a gallery
-    @GetMapping("/{id}/media")
-    public ResponseEntity<List<Media>> getGalleryMedia(@PathVariable Long id) {
-        return ResponseEntity.ok(mediaService.listMedia(id));
+    @GetMapping("/{galleryId}/media")
+    public ResponseEntity<List<MediaResponse>> getGalleryMedia(
+            @PathVariable long galleryId,
+            @RequestParam Long businessId) { // ← Changed from businessName to businessId
+
+        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessId);
+        return ResponseEntity.ok(media);
+    }
+
+    // get media URLs directly from S3 (bypasses database)
+    @GetMapping("/{galleryId}/media-urls")
+    public ResponseEntity<List<String>> getGalleryMediaUrlsDirect(
+            @PathVariable long galleryId,
+            @RequestParam Long businessId) { // ← Add this new endpoint if needed
+
+        List<String> mediaUrls = mediaService.getGalleryMediaUrlsDirect(businessId, galleryId);
+        return ResponseEntity.ok(mediaUrls);
     }
 
     // placeholder for sending gallery email

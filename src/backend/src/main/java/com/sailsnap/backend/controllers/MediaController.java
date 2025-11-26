@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sailsnap.backend.dto.MediaResponse;
 import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.enums.CompressionLevel;
 import com.sailsnap.backend.services.MediaService;
@@ -31,10 +32,9 @@ public class MediaController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("businessId") Long businessId,
             @RequestParam("galleryId") Long galleryId,
-            @RequestParam("businessName") String businessName,
             @RequestParam(value = "compressionLevel", defaultValue = "MEDIUM") CompressionLevel compressionLevel) {
 
-        Media savedMedia = mediaService.uploadMedia(file, businessId, galleryId, businessName, compressionLevel);
+        Media savedMedia = mediaService.uploadMedia(file, businessId, galleryId, compressionLevel);
         return ResponseEntity.ok(savedMedia);
     }
 
@@ -47,5 +47,29 @@ public class MediaController {
         } else {
             return ResponseEntity.status(500).body("Failed to delete media");
         }
+    }
+
+    /**
+     * Get all media for a gallery with S3 URLs for frontend display
+     */
+    @GetMapping("/gallery/{galleryId}")
+    public ResponseEntity<List<MediaResponse>> getGalleryMedia(
+            @PathVariable long galleryId,
+            @RequestParam Long businessId) { // ← Changed from businessName to businessId
+
+        List<MediaResponse> media = mediaService.getGalleryMedia(galleryId, businessId);
+        return ResponseEntity.ok(media);
+    }
+
+    /**
+     * Get direct S3 URLs for gallery media (alternative approach)
+     */
+    @GetMapping("/gallery/{galleryId}/urls")
+    public ResponseEntity<List<String>> getGalleryMediaUrls(
+            @PathVariable long galleryId,
+            @RequestParam Long businessId) { // ← Changed from businessName to businessId
+
+        List<String> urls = mediaService.getGalleryMediaUrlsDirect(businessId, galleryId);
+        return ResponseEntity.ok(urls);
     }
 }
