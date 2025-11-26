@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.sailsnap.backend.dto.MediaResponse;
 import com.sailsnap.backend.entities.Gallery;
-import com.sailsnap.backend.entities.Media;
 import com.sailsnap.backend.services.GalleryService;
 import com.sailsnap.backend.services.MediaService;
 
