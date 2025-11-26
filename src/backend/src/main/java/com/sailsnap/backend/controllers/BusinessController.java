@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.sailsnap.backend.entities.Business;
 import com.sailsnap.backend.services.BusinessService;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -45,5 +46,15 @@ public class BusinessController {
         String email = credentials.get("email");
         String password = credentials.get("password");
         return ResponseEntity.ok(businessService.login(email, password));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Business>> getAllBusinesses() {
+        return ResponseEntity.ok(businessService.getAllBusinesses());
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<Business>> getActiveBusinesses() {
+        return ResponseEntity.ok(businessService.getActiveBusinesses());
     }
 }

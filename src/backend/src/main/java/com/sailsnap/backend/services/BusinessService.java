@@ -1,6 +1,7 @@
 package com.sailsnap.backend.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,7 @@ public class BusinessService {
         business.setCreatedAt(LocalDateTime.now());
         business.setUpdatedAt(LocalDateTime.now());
         business.setActive(true);
-        
+
         // Let S3Repository handle bucket creation and naming
         String bucketName = s3Repository.createBucketForBusiness(business.getBusinessName());
         business.setBucketName(bucketName);
@@ -62,5 +63,13 @@ public class BusinessService {
 
         business.setLastLoginAt(LocalDateTime.now());
         return businessRepository.save(business);
+    }
+
+    public List<Business> getAllBusinesses() {
+        return businessRepository.findAll();
+    }
+
+    public List<Business> getActiveBusinesses() {
+        return businessRepository.findByIsActiveTrue();
     }
 }
