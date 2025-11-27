@@ -1,8 +1,61 @@
 // src/pages/dashboard/BusinessDashboard.tsx
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../contexts/AuthContext'
+import GalleryCreationPopup from '../../components/galleryCreationPopup'
+import GalleryViewPopup from '../../components/galleryViewPopup'
+
+interface Gallery {
+    id: number
+    name: string
+    createdAt: string
+}
 
 export default function BusinessDashboard() {
+    const { business } = useAuth()
     const [showGalleryPopup, setShowGalleryPopup] = useState(false)
+    const [showViewPopup, setShowViewPopup] = useState(false)
+    const [galleries, setGalleries] = useState<Gallery[]>([])
+    const [loading, setLoading] = useState(true)
+    const [selectedGallery, setSelectedGallery] = useState<Gallery | null>(null)
+
+    useEffect(() => {
+        const fetchGalleries = async () => {
+            if (!business?.id) return
+
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/galleries/list-galleries?businessId=${business.id}`,
+                    {
+                        method: 'POST',
+                    }
+                )
+
+                if (response.ok) {
+                    const galleriesData = await response.json()
+                    setGalleries(galleriesData)
+                }
+            } catch (error) {
+                console.error('Failed to fetch galleries:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchGalleries()
+    }, [business?.id])
+
+    const handleViewGallery = (gallery: Gallery) => {
+        setSelectedGallery(gallery)
+        setShowViewPopup(true)
+    }
+
+    const handleGalleryCreated = (gallery: any) => {
+        setGalleries(prev => [...prev, gallery])
+    }
+
+    if (loading) {
+        return <div>Loading galleries...</div>
+    }
 
     return (
         <div>
@@ -13,25 +66,37 @@ export default function BusinessDashboard() {
                 Create New Gallery
             </button>
 
-            {showGalleryPopup && (
-                <div style={{
-                    position: 'fixed',
-                    top: '15%',
-                    left: '15%',
-                    width: '70%',
-                    height: '70%',
-                    backgroundColor: 'white',
-                    border: '1px solid #ccc',
-                    zIndex: 1000,
-                    padding: '20px'
-                }}>
-                    <h2>Gallery Creation</h2>
-                    <p>This is where you'll create new galleries.</p>
-                    <button onClick={() => setShowGalleryPopup(false)}>
-                        Close
-                    </button>
-                </div>
-            )}
+            <div style={{ marginTop: '20px' }}>
+                <h3>Your Galleries ({galleries.length})</h3>
+                {galleries.length === 0 ? (
+                    <p>No galleries yet. Create your first one!</p>
+                ) : (
+                    <div>
+                        {galleries.map(gallery => (
+                            <div key={gallery.id} style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
+                                <h4>{gallery.name}</h4>
+                                <p>ID: {gallery.id}</p>
+                                <p>Created: {new Date(gallery.createdAt).toLocaleDateString()}</p>
+                                <button onClick={() => handleViewGallery(gallery)}>
+                                    View Gallery
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <GalleryCreationPopup
+                isOpen={showGalleryPopup}
+                onClose={() => setShowGalleryPopup(false)}
+                onGalleryCreated={handleGalleryCreated}
+            />
+
+            <GalleryViewPopup
+                isOpen={showViewPopup}
+                onClose={() => setShowViewPopup(false)}
+                gallery={selectedGallery}
+            />
         </div>
     )
 }
