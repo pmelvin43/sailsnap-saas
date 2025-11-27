@@ -106,7 +106,7 @@ export default function GalleryViewPopup({ isOpen, onClose, gallery }: GalleryVi
                                         src={media.mediaUrl}  // Use mediaUrl here!
                                         style={{ width: '100%', height: '150px', objectFit: 'cover' }}
                                         controls
-                                        onError={(e) => console.error('Failed to load video:', media.mediaUrl)}
+                                        onError={() => console.error('Failed to load video:', media.mediaUrl)}
                                     />
                                 )}
                                 <p style={{ fontSize: '12px', marginTop: '5px' }}>
