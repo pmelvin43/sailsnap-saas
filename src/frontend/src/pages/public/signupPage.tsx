@@ -1,80 +1,106 @@
 // src/pages/public/SignupPage.tsx
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+interface Business {
+    businessName: string
+    email: string
+    password: string
+}
+
 export default function Signup() {
-    // We'll add state and functionality here next
+    const [formData, setFormData] = useState<Business>({
+        businessName: '',
+        email: '',
+        password: ''
+    })
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
+    const navigate = useNavigate()
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target
+        setFormData(prev => ({
+            ...prev,
+            [id]: value
+        }))
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setLoading(true)
+        setError('')
+
+        try {
+            const response = await fetch('http://localhost:8080/business/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+
+            if (response.ok) {
+                navigate('/login')
+            } else {
+                const errorData = await response.json()
+                setError(errorData.message || 'Registration failed')
+            }
+        } catch (err) {
+            setError('Network error. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
-        <div style={{
-            maxWidth: '400px',
-            margin: '2rem auto',
-            padding: '2rem',
-            border: '1px solid #ddd',
-            borderRadius: '8px'
-        }}>
+        <div>
             <h1>Create Your SailSnap Account</h1>
 
-            <form>
-                <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="businessName" style={{ display: 'block', marginBottom: '0.5rem' }}>
-                        Business Name
-                    </label>
+            {error && <div>{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="businessName">Business Name</label>
                     <input
                         type="text"
                         id="businessName"
-                        style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px'
-                        }}
+                        value={formData.businessName}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="email" style={{ display: 'block', marginBottom: '0.5rem' }}>
-                        Email
-                    </label>
+                <div>
+                    <label htmlFor="email">Email</label>
                     <input
                         type="email"
                         id="email"
-                        style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px'
-                        }}
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
 
-                <div style={{ marginBottom: '1rem' }}>
-                    <label htmlFor="password" style={{ display: 'block', marginBottom: '0.5rem' }}>
-                        Password
-                    </label>
+                <div>
+                    <label htmlFor="password">Password</label>
                     <input
                         type="password"
                         id="password"
-                        style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px'
-                        }}
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
                     />
                 </div>
 
-                <button
-                    type="submit"
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Sign Up
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Creating Account...' : 'Sign Up'}
                 </button>
             </form>
+
+            <div>
+                <p>Already have an account? <a href="/login">Login here</a></p>
+            </div>
         </div>
     )
 }
