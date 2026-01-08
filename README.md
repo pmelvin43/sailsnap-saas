@@ -41,7 +41,7 @@ SailSnap is a lightweight SaaS platform designed for tourism companies to effici
 
 ## Getting Started
 
-> Full setup instructions will be included as development progresses. This project is currently under active development.
+> To run the project, simply docker compose up and it will start all services. It is currently mocking AWS with localstack while it is under development.
 
 ## Project Objectives
 
