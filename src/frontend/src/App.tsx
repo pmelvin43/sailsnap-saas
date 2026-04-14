@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import AuthLayout from './components/authLayout'
-import DashboardLayout from './components/dashboardLayout'
-import Signup from './pages/public/signupPage'
-import Login from './pages/public/loginPage'
-import LandingPage from './pages/public/landingPage'
+import AuthLayout from './components/AuthLayout'
+import DashboardLayout from './components/DashboardLayout'
+import Signup from './pages/public/SignupPage'
+import Login from './pages/public/LoginPage'
+import LandingPage from './pages/public/LandingPage'
 import ProtectedRoute from './components/ProtectedRoute'
-import BusinessDashboard from './pages/dashboard/businessDashboard'
-import AutoRedirect from './components/autoRedirect'
+import BusinessDashboard from './pages/dashboard/BusinessDashboard'
+import AutoRedirect from './components/AutoRedirect'
 
 function App() {
   return (

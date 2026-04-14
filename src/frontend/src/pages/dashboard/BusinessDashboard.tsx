@@ -1,8 +1,9 @@
 // src/pages/dashboard/BusinessDashboard.tsx
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import GalleryCreationPopup from '../../components/galleryCreationPopup'
-import GalleryViewPopup from '../../components/galleryViewPopup'
+import GalleryCreationPopup from '../../components/GalleryCreationPopup'
+import GalleryViewPopup from '../../components/GalleryViewPopup'
+import SendGalleryPopup from '../../components/SendGalleryPopup'
 
 interface Gallery {
     id: number
@@ -14,6 +15,7 @@ export default function BusinessDashboard() {
     const { business } = useAuth()
     const [showGalleryPopup, setShowGalleryPopup] = useState(false)
     const [showViewPopup, setShowViewPopup] = useState(false)
+    const [showSendPopup, setShowSendPopup] = useState(false)
     const [galleries, setGalleries] = useState<Gallery[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedGallery, setSelectedGallery] = useState<Gallery | null>(null)
@@ -80,6 +82,12 @@ export default function BusinessDashboard() {
                                 <button onClick={() => handleViewGallery(gallery)}>
                                     View Gallery
                                 </button>
+                                <button onClick={() => {
+                                    setSelectedGallery(gallery)
+                                    setShowSendPopup(true)
+                                }}>
+                                    Send Gallery
+                                </button>
                             </div>
                         ))}
                     </div>
@@ -95,6 +103,12 @@ export default function BusinessDashboard() {
             <GalleryViewPopup
                 isOpen={showViewPopup}
                 onClose={() => setShowViewPopup(false)}
+                gallery={selectedGallery}
+            />
+
+            <SendGalleryPopup
+                isOpen={showSendPopup}
+                onClose={() => setShowSendPopup(false)}
                 gallery={selectedGallery}
             />
         </div>
